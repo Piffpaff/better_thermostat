@@ -1144,7 +1144,7 @@ class BetterThermostat(ClimateEntity, RestoreEntity, ABC):
                 and self.bt_hvac_mode is not HVACMode.OFF
                 and self.attr_hvac_action is HVACAction.HEATING
             ):
-                _LOGGER.debug("Continuing heating option 2, self.bt_target_temp > self.cur_temp + self.tolerance: %f > %f + %f", self.bt_target_temp, self.cur_temp, self.tolerance)
+                _LOGGER.debug("Continuing heating option 2, self.bt_target_temp > self.cur_temp: %f > %f", self.bt_target_temp, self.cur_temp)
                 self.attr_hvac_action = HVACAction.HEATING                
             else:
                 self.attr_hvac_action = HVACAction.IDLE
