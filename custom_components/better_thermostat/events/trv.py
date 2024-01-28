@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 import logging
 from typing import Union
+import math
 from custom_components.better_thermostat.utils.const import CONF_HOMATICIP
 
 from homeassistant.components.climate.const import (
