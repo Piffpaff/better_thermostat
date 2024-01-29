@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime
 import logging
 from typing import Union
-import math
 from custom_components.better_thermostat.utils.const import CONF_HOMATICIP
 
 from homeassistant.components.climate.const import (
@@ -247,26 +246,32 @@ async def update_hvac_action(self):
 
     hvac_actions = list(find_state_attributes(states, ATTR_HVAC_ACTION))
 
-    if not hvac_actions:
-        self.attr_hvac_action = None
-    # return action off if all are off
-    elif all(a == HVACAction.OFF for a in hvac_actions):
-        hvac_action = HVACAction.OFF
+    # if not hvac_actions:
+    #     self.attr_hvac_action = None
+    #     _LOGGER.debug("update_hvac_action condition 1")
+    # # return action off if all are off
+    # elif all(a == HVACAction.OFF for a in hvac_actions):
+    #     hvac_action = HVACAction.OFF
+    #     _LOGGER.debug("update_hvac_action condition 2")
     # else check if is heating
-    elif (
+    if (
         self.bt_target_temp > self.cur_temp + self.tolerance
+        and (self.attr_hvac_action == HVACAction.IDLE or self.attr_hvac_action == None)
         and self.window_open is False
     ):
         hvac_action = HVACAction.HEATING
+        _LOGGER.debug("update_hvac_action condition 3")
     elif (
         self.bt_target_temp > self.cur_temp
         and self.attr_hvac_action == HVACAction.HEATING
         and self.window_open is False
     ):
         hvac_action = HVACAction.HEATING
+        _LOGGER.debug("update_hvac_action condition 4")
     else:
         hvac_action = HVACAction.IDLE
-
+        _LOGGER.debug("update_hvac_action condition 5")
+    _LOGGER.debug("update_hvac_action resulting action, old: %s, new: %s", self.hvac_action, hvac_action)
     if self.hvac_action != hvac_action:
         self.attr_hvac_action = hvac_action
         await self.async_update_ha_state(force_refresh=True)
