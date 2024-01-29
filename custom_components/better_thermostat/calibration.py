@@ -1,5 +1,6 @@
 """Helper functions for the Better Thermostat component."""
 import logging
+import math
 from typing import Union
 
 from homeassistant.components.climate.const import HVACAction
@@ -92,8 +93,11 @@ def calculate_calibration_local(self, entity_id) -> Union[float, None]:
 
     # Respecting tolerance in all calibration modes, delaying heat
     if self.attr_hvac_action == HVACAction.IDLE:
-        if _new_trv_calibration < 0.0:
-            _new_trv_calibration += self.tolerance
+        if self.bt_target_temp > self.cur_temp:
+            _calibrated_setpoint = math.ceil(self.bt_target_temp*2)/2
+        else:
+            _calibrated_setpoint = math.floor(self.bt_target_temp*2)/2
+    _LOGGER.debug("_calibrated_setpoint: %f", _calibrated_setpoint)
 
     _new_trv_calibration = fix_local_calibration(self, entity_id, _new_trv_calibration)
 
@@ -185,8 +189,11 @@ def calculate_calibration_setpoint(self, entity_id) -> Union[float, None]:
             )
 
     if self.attr_hvac_action == HVACAction.IDLE:
-        if _calibrated_setpoint - _cur_trv_temp_s > 0.0:
-            _calibrated_setpoint -= self.tolerance
+        if self.bt_target_temp > self.cur_temp:
+            _calibrated_setpoint = math.ceil(self.bt_target_temp*2)/2
+        else:
+            _calibrated_setpoint = math.floor(self.bt_target_temp*2)/2
+    _LOGGER.debug("_calibrated_setpoint: %f", _calibrated_setpoint)
 
     _calibrated_setpoint = fix_target_temperature_calibration(
         self, entity_id, _calibrated_setpoint
