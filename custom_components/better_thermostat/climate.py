@@ -1117,36 +1117,45 @@ class BetterThermostat(ClimateEntity, RestoreEntity, ABC):
     @property
     def hvac_action(self):
         """Return the current HVAC action"""
+        _LOGGER.debug(
+                "better_thermostat %s: getting hvac_action,  self.attr_hvac_action: %s, self.bt_target_temp: %s, self.cur_temp: %s, self.tolerance: %s", self.name, self.attr_hvac_action, self.bt_target_temp, self.cur_temp, self.tolerance
+            )
         if (
-            self.bt_target_temp is not None
+            (self.attr_hvac_action is None
+            or self.attr_hvac_action == HVACAction.IDLE)
+            and self.bt_target_temp is not None
             and self.cur_temp is not None
         ):
             if self.hvac_mode == HVACMode.OFF:
                 self.attr_hvac_action = HVACAction.OFF
-            elif (self.bt_target_temp > self.cur_temp and self.attr_hvac_action == HVACAction.HEATING):
-                _LOGGER.debug("Continuing heating option 1, self.bt_target_temp > self.cur_temp: %f > %f", self.bt_target_temp, self.cur_temp)
-                self.attr_hvac_action = HVACAction.HEATING
-            elif (self.bt_target_temp > self.cur_temp + self.tolerance and self.window_open is False and self.attr_hvac_action is not HVACAction.HEATING):
-                _LOGGER.debug("Starting heating option 1, self.bt_target_temp > self.cur_temp + self.tolerance: %f > %f + %f", self.bt_target_temp, self.cur_temp, self.tolerance)
+            elif self.bt_target_temp > self.cur_temp + self.tolerance and self.window_open is False:
                 self.attr_hvac_action = HVACAction.HEATING
             elif (
                 self.bt_target_temp > self.cur_temp + self.tolerance
                 and self.window_open is False
                 and self.bt_hvac_mode is not HVACMode.OFF
-                and self.attr_hvac_action is not HVACAction.HEATING
             ):
-                _LOGGER.debug("Starting heating option 2, self.bt_target_temp > self.cur_temp + self.tolerance: %f > %f + %f", self.bt_target_temp, self.cur_temp, self.tolerance)
+                self.attr_hvac_action = HVACAction.HEATING
+            else:
+                self.attr_hvac_action = HVACAction.IDLE
+        elif (
+            self.attr_hvac_action is not None
+            and self.attr_hvac_action == HVACAction.HEATING
+            and self.bt_target_temp is not None
+            and self.cur_temp is not None
+        ):
+            if self.hvac_mode == HVACMode.OFF:
+                self.attr_hvac_action = HVACAction.OFF
+            elif self.bt_target_temp > self.cur_temp and self.window_open is False:
                 self.attr_hvac_action = HVACAction.HEATING
             elif (
                 self.bt_target_temp > self.cur_temp
                 and self.window_open is False
                 and self.bt_hvac_mode is not HVACMode.OFF
-                and self.attr_hvac_action == HVACAction.HEATING
             ):
-                _LOGGER.debug("Continuing heating option 2, self.bt_target_temp > self.cur_temp: %f > %f", self.bt_target_temp, self.cur_temp)
-                self.attr_hvac_action = HVACAction.HEATING                
+                self.attr_hvac_action = HVACAction.HEATING
             else:
-                self.attr_hvac_action = HVACAction.IDLE
+                self.attr_hvac_action = HVACAction.IDLE                
         return self.attr_hvac_action
 
     @property
