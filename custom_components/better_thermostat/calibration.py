@@ -1,7 +1,6 @@
 """Helper functions for the Better Thermostat component."""
 import logging
 from typing import Union
-import math
 
 from homeassistant.components.climate.const import HVACAction
 
@@ -185,17 +184,14 @@ def calculate_calibration_setpoint(self, entity_id) -> Union[float, None]:
                 * valve_position
             )
 
-    _LOGGER.debug("self.attr_hvac_action: %s, self.bt_target_temp: %f, self.cur_temp: %f", self.attr_hvac_action, self.bt_target_temp, self.cur_temp)
     if self.attr_hvac_action == HVACAction.IDLE:
-        if self.bt_target_temp > self.cur_temp:
-            _calibrated_setpoint = math.ceil(self.bt_target_temp*2)/2
-        else:
-            _calibrated_setpoint = math.floor(self.bt_target_temp*2)/2
-    _LOGGER.debug("_calibrated_setpoint: %f", _calibrated_setpoint)
+        if _calibrated_setpoint - _cur_trv_temp_s > 0.0:
+            _calibrated_setpoint -= self.tolerance
+
     _calibrated_setpoint = fix_target_temperature_calibration(
         self, entity_id, _calibrated_setpoint
     )
-    _LOGGER.debug("_calibrated_setpoint after fix: %f", _calibrated_setpoint)
+
     _overheating_protection = self.real_trvs[entity_id]["advanced"].get(
         CONF_PROTECT_OVERHEATING, False
     )
