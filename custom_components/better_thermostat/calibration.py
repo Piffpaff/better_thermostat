@@ -1,4 +1,5 @@
 """Helper functions for the Better Thermostat component."""
+
 import logging
 import math
 from typing import Union
