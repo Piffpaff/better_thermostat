@@ -191,7 +191,7 @@ def calculate_calibration_setpoint(self, entity_id) -> Union[float, None]:
 
     if self.attr_hvac_action == HVACAction.IDLE:
         if self.bt_target_temp > self.cur_temp:
-            _calibrated_setpoint = math.ceil(self.bt_target_temp*2)/2
+            _calibrated_setpoint = math.ceil(self.bt_target_temp*2)/2 + 1.0
         else:
             _calibrated_setpoint = math.floor(self.bt_target_temp*2)/2
     _LOGGER.debug("_calibrated_setpoint: %f", _calibrated_setpoint)
